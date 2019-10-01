@@ -25,6 +25,7 @@ app.get('/', (req, res)=> {
 
 app.listen(8000)
 
+// Enable form data to be available in req body
 app.use(bodyParser.urlencoded({extended: true}))
 
 
@@ -39,9 +40,7 @@ app.use(bodyParser.urlencoded({extended: true}))
  *                      Redis not exited cleanly
  */
 
-app.post('/submit', (req, res) => {
-    var targetURL = req.body.targeturl;
-
+ function checkCacheAndSendResponse(req, res, targetURL) {
     client.get(targetURL, (err, result) => {
         if (err == null && result != null) {
             console.log("sending from memory");
@@ -55,14 +54,23 @@ app.post('/submit', (req, res) => {
                             res.send(body);
                         }
                     })
-                    // cached_pages[targetURL] = body;
-                    // cached_bytes[targetURL] = response.socket.bytesRead;
                 } else {
                     console.log("invalid url: " + error);
                 }
             })
         }
     })
+ }
+
+app.post('/submit', (req, res) => {
+    var targetURL = req.body.targeturl;
+    checkCacheAndSendResponse(req, res, targetURL);
+})
+
+// Routes for type for /submit?url=""
+app.get('/submit', (req, res) => {
+    var targetURL = req.query.url;
+    checkCacheAndSendResponse(req, res, targetURL);
 })
 
 app.get('/index', (req, res) => {
@@ -84,11 +92,10 @@ app.get('/index', (req, res) => {
     });
 })
 
-
-
 // Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36
 // var options = {
 //     url: page,
 //     headers: {
 //       'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
 //     }
+// }
