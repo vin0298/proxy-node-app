@@ -39,7 +39,6 @@ app.use(bodyParser.urlencoded({extended: true}))
  *                      Some pages encounter "Update browser problem" : facebook
  *                      Redis not exited cleanly
  */
-
  function checkCacheAndSendResponse(req, res, targetURL) {
     client.get(targetURL, (err, result) => {
         if (err == null && result != null) {
@@ -62,6 +61,7 @@ app.use(bodyParser.urlencoded({extended: true}))
     })
  }
 
+ // Limitation: Getting routes of /submit/:url
 app.post('/submit', (req, res) => {
     var targetURL = req.body.targeturl;
     checkCacheAndSendResponse(req, res, targetURL);
@@ -73,23 +73,28 @@ app.get('/submit', (req, res) => {
     checkCacheAndSendResponse(req, res, targetURL);
 })
 
-app.get('/index', (req, res) => {
+function getAllRedisKeyValuePairs(req, res) {
     // Get all the keys(URL) and value.toString().length and render itex
     client.keys('*', function (err, keys) {
         if (err) return console.log(err);
-        if (keys) {
-            async.map(keys, function(key, callback) {
-               client.get(key, function (error, value) {
-                    if (error) return cb(error);
-                    cached_pages[key] = value.toString().length;
-                    callback(null);
-                }); 
-            }, function (error) {
-               if (error) return console.log(error);
-               res.render('test', {cached_pages: cached_pages});
-            });
-        }
-    });
+            if (keys) {
+                async.map(keys, function(key, callback) {
+                   client.get(key, function (error, value) {
+                        if (error) return cb(error);
+                        cached_pages[key] = value.toString().length;
+                        callback(null);
+                    }); 
+                }, function (error) {
+                   if (error) return console.log(error);
+                   res.render('test', {cached_pages: cached_pages});
+                });
+            }
+        });
+}
+
+app.get('/index', (req, res) => {
+    // Get all the keys(URL) and value.toString().length and render itex
+    getAllRedisKeyValuePairs(req, res);
 })
 
 // Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36

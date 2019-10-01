@@ -5,8 +5,8 @@ html
         .section
             .containers
                 .container 
-                    h1 Size in bytes for the cached pages: 
+                    h1 Approximate size in bytes for the cached pages: 
                 .container
                     ul
                         each bytes,url in cached_pages
-                            li= bytes + " bytes : " + url
+                            li= "URL: " + url + " | Bytes: " + bytes
