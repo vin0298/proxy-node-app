@@ -5,6 +5,7 @@ const router = express.Router();
 const request = require('request');
 const bodyParser = require('body-parser');
 const path = require('path');
+const async = require('async');
 
 // Initialised redis to cache response body
 const redis = require('redis'),
@@ -48,13 +49,14 @@ app.post('/submit', (req, res) => {
         } else {
             request(targetURL, function(error, response, body) {
                 if (!error && parseInt(response.statusCode) == 200) { 
+                    console.log("response body length: " + response.socket.bytesRead);
                     client.set(targetURL, body, (err, reply) => {
                         if (reply == 'OK') {
                             res.send(body);
                         }
                     })
-                    cached_pages[targetURL] = body;
-                    cached_bytes[targetURL] = response.socket.bytesRead;
+                    // cached_pages[targetURL] = body;
+                    // cached_bytes[targetURL] = response.socket.bytesRead;
                 } else {
                     console.log("invalid url: " + error);
                 }
@@ -64,7 +66,22 @@ app.post('/submit', (req, res) => {
 })
 
 app.get('/index', (req, res) => {
-    res.render('test', {cached_pages: cached_pages, cached_bytes: cached_bytes});
+    // Get all the keys(URL) and value.toString().length and render itex
+    client.keys('*', function (err, keys) {
+        if (err) return console.log(err);
+        if (keys) {
+            async.map(keys, function(key, callback) {
+               client.get(key, function (error, value) {
+                    if (error) return cb(error);
+                    cached_pages[key] = value.toString().length;
+                    callback(null);
+                }); 
+            }, function (error) {
+               if (error) return console.log(error);
+               res.render('test', {cached_pages: cached_pages});
+            });
+        }
+    });
 })
 
 

@@ -8,5 +8,5 @@ html
                     h1 Size in bytes for the cached pages: 
                 .container
                     ul
-                        each bytes,test in cached_bytes
-                            li= bytes + " bytes : " + test
+                        each bytes,url in cached_pages
+                            li= bytes + " bytes : " + url
