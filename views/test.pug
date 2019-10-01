@@ -1,0 +1,12 @@
+html
+    head
+        link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.css')
+    body
+        .section
+            .containers
+                .container 
+                    h1 Size in bytes for the cached pages: 
+                .container
+                    ul
+                        each bytes,test in cached_bytes
+                            li= bytes + " bytes : " + test
