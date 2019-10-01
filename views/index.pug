@@ -1,0 +1,13 @@
+html
+    head
+        link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.css')
+    body
+        .section
+            .containers
+                .container
+                    form(method='POST', action='/submit')
+                        .field
+                            label.label Enter the URL
+                            .control
+                                input.input(name='username', type='text', placeholder='https://www.example.com')
+                                
